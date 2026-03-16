@@ -11,6 +11,19 @@ from torch.utils.data import DataLoader
 from src.ssm import PotatoConfig, PotatoLM
 
 
+def _get_tokenizer(data_dir: Path):
+    tokenizer_path = Path(data_dir) / "tokenizer.model"
+    if tokenizer_path.exists():
+        from src.tokenizer import PotatoTokenizer
+        tok = PotatoTokenizer()
+        tok.load(tokenizer_path)
+        return tok
+    class DummyTokenizer:
+        def encode(self, text, add_bos=False, add_eos=False):
+            return [min(ord(c), 31999) for c in text[:512]]
+    return DummyTokenizer()
+
+
 def train_step(
     model: PotatoLM,
     batch: dict,
@@ -44,6 +57,7 @@ def main():
     parser.add_argument("--batch_size", type=int, default=2)
     parser.add_argument("--lr", type=float, default=5e-5)
     parser.add_argument("--max_steps", type=int, default=100)
+    parser.add_argument("--data_dir", type=Path, default=Path("data"))
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     args = parser.parse_args()
 
@@ -56,18 +70,11 @@ def main():
         model.load_state_dict(state, strict=False)
         print(f"Loaded {args.checkpoint}")
 
-    # Sample instruction data
-    examples = [
-        {"instruction": "What is 2+2?", "output": "2+2 equals 4."},
-        {"instruction": "Say hello.", "output": "Hello! How can I help you?"},
-    ]
-
-    class DummyTokenizer:
-        def encode(self, text, add_bos=False, add_eos=False):
-            return [min(ord(c), 31999) for c in text[:512]]
-
-    from data.loaders import InstructionDataset
-    dataset = InstructionDataset(examples, DummyTokenizer(), max_length=128)
+    # Load instruction data from JSONL or use defaults
+    from data.loaders import InstructionDataset, load_instructions
+    examples = load_instructions(args.data_dir or Path("data"))
+    tok = _get_tokenizer(args.data_dir or Path("data"))
+    dataset = InstructionDataset(examples, tok, max_length=256)
     loader = DataLoader(dataset, batch_size=args.batch_size, shuffle=True)
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)

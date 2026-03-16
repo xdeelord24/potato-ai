@@ -4,7 +4,10 @@ Saves in FP16 for ~50% size reduction; full 4-bit requires bitsandbytes.
 """
 
 import argparse
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import torch
 

@@ -2,6 +2,7 @@
 Data loaders for pre-training, SFT, and agent fine-tuning.
 """
 
+import json
 from pathlib import Path
 from typing import Iterator, Optional
 
@@ -29,8 +30,13 @@ class TextDataset(Dataset):
         for path in self.paths:
             text = Path(path).read_text(encoding="utf-8", errors="ignore")
             ids = self.tokenizer.encode(text, add_bos=True, add_eos=True)
-            for i in range(0, len(ids) - self.max_length, self.stride):
-                self._data.append(ids[i : i + self.max_length])
+            if len(ids) <= self.max_length:
+                # Pad short docs with pad_id (0)
+                padded = ids + [0] * (self.max_length - len(ids))
+                self._data.append(padded)
+            else:
+                for i in range(0, len(ids) - self.max_length, self.stride):
+                    self._data.append(ids[i : i + self.max_length])
 
     def __len__(self) -> int:
         if not self._data:
@@ -114,3 +120,34 @@ def get_sample_agent_data() -> list[dict]:
             )
         },
     ]
+
+
+def load_instructions(data_dir: Path) -> list[dict]:
+    """Load instruction examples from JSONL file."""
+    path = Path(data_dir) / "instructions.jsonl"
+    if path.exists():
+        examples = []
+        with open(path, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    examples.append(json.loads(line))
+        return examples
+    return [
+        {"instruction": "What is 2+2?", "output": "2+2 equals 4."},
+        {"instruction": "Say hello.", "output": "Hello! How can I help you?"},
+    ]
+
+
+def load_agent_data(data_dir: Path) -> list[dict]:
+    """Load agent trajectories from JSONL file."""
+    path = Path(data_dir) / "agent_trajectories.jsonl"
+    if path.exists():
+        examples = []
+        with open(path, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    examples.append(json.loads(line))
+        return examples
+    return get_sample_agent_data()

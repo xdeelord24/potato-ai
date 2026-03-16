@@ -11,6 +11,19 @@ from torch.utils.data import DataLoader
 from src.ssm import PotatoConfig, PotatoLM
 
 
+def _get_tokenizer(data_dir: Path):
+    tokenizer_path = Path(data_dir) / "tokenizer.model"
+    if tokenizer_path.exists():
+        from src.tokenizer import PotatoTokenizer
+        tok = PotatoTokenizer()
+        tok.load(tokenizer_path)
+        return tok
+    class DummyTokenizer:
+        def encode(self, text, add_bos=False, add_eos=False):
+            return [min(ord(c), 31999) for c in text[:512]]
+    return DummyTokenizer()
+
+
 def train_step(
     model: PotatoLM,
     batch: dict,
@@ -44,6 +57,7 @@ def main():
     parser.add_argument("--batch_size", type=int, default=2)
     parser.add_argument("--lr", type=float, default=2e-5)
     parser.add_argument("--max_steps", type=int, default=50)
+    parser.add_argument("--data_dir", type=Path, default=Path("data"))
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     args = parser.parse_args()
 
@@ -56,14 +70,10 @@ def main():
         model.load_state_dict(state, strict=False)
         print(f"Loaded {args.checkpoint}")
 
-    from data.loaders import AgentDataset, get_sample_agent_data
-    examples = get_sample_agent_data()
-
-    class DummyTokenizer:
-        def encode(self, text, add_bos=False, add_eos=False):
-            return [min(ord(c), 31999) for c in text[:512]]
-
-    dataset = AgentDataset(examples, DummyTokenizer(), max_length=256)
+    from data.loaders import AgentDataset, load_agent_data
+    examples = load_agent_data(args.data_dir or Path("data"))
+    tok = _get_tokenizer(args.data_dir or Path("data"))
+    dataset = AgentDataset(examples, tok, max_length=256)
     loader = DataLoader(dataset, batch_size=args.batch_size, shuffle=True)
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)

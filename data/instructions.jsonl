@@ -1,0 +1,10 @@
+{"instruction": "What is 2 + 2?", "output": "2 + 2 equals 4."}
+{"instruction": "Say hello in a friendly way.", "output": "Hello! How can I help you today?"}
+{"instruction": "What color is the sky?", "output": "The sky is typically blue during the day due to how sunlight scatters in the atmosphere."}
+{"instruction": "How many days are in a week?", "output": "There are 7 days in a week: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, and Sunday."}
+{"instruction": "What is the capital of France?", "output": "The capital of France is Paris."}
+{"instruction": "Explain what a variable is in programming.", "output": "A variable is a named container that stores a value. You can change the value stored in a variable during program execution."}
+{"instruction": "What does CPU stand for?", "output": "CPU stands for Central Processing Unit. It is the main component that executes instructions in a computer."}
+{"instruction": "Name three programming languages.", "output": "Three popular programming languages are Python, JavaScript, and Java."}
+{"instruction": "What is machine learning?", "output": "Machine learning is a type of artificial intelligence where computers learn from data to make predictions or decisions without being explicitly programmed."}
+{"instruction": "How do you convert Celsius to Fahrenheit?", "output": "To convert Celsius to Fahrenheit, multiply by 9/5 and add 32. The formula is F = C * 9/5 + 32."}

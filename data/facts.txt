@@ -1,0 +1,13 @@
+Water boils at 212 degrees Fahrenheit or 100 degrees Celsius at sea level. The freezing point of water is 32 degrees Fahrenheit or 0 degrees Celsius. Water expands when it freezes, which is why ice floats.
+
+The Earth orbits the Sun once every 365.25 days. This extra quarter day is why we have leap years every four years. The Moon orbits the Earth in about 27 days.
+
+Light travels at approximately 186,000 miles per second in a vacuum. It takes about 8 minutes for sunlight to reach Earth. The nearest star beyond our Sun is over 4 light years away.
+
+The human body has 206 bones in an adult. The smallest bone is in the ear. The femur in the thigh is the longest and strongest bone. Bones store calcium and produce blood cells.
+
+Photosynthesis is the process by which plants convert sunlight into energy. Chlorophyll gives plants their green color. Plants take in carbon dioxide and release oxygen. This process sustains life on Earth.
+
+The Pacific Ocean is the largest ocean on Earth. It covers about one third of the planet's surface. The Mariana Trench in the Pacific is the deepest point in any ocean.
+
+Python was created by Guido van Rossum and first released in 1991. The name comes from the comedy group Monty Python. Python emphasizes code readability with its use of significant whitespace.

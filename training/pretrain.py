@@ -51,24 +51,35 @@ def main():
 
     configs = {"tiny": PotatoConfig.tiny(), "small": PotatoConfig.small(), "base": PotatoConfig.base()}
     config = configs[args.config]
-    model = PotatoLM(config).to(args.device)
+    # Use tokenizer vocab size if available (after tokenizer is loaded below)
+    model = None  # created after tokenizer
 
-    # Create minimal dummy dataset if no data
     data_dir = args.data_dir
     data_dir.mkdir(parents=True, exist_ok=True)
-    text_files = list(data_dir.glob("*.txt"))
+    text_files = sorted(data_dir.glob("*.txt"))
     if not text_files:
         sample = data_dir / "sample.txt"
-        sample.write_text("The quick brown fox jumps over the lazy dog. " * 1000)
+        sample.write_text("The quick brown fox jumps over the lazy dog. " * 100)
         text_files = [sample]
 
-    # Dummy tokenizer for demo (use real tokenizer in production)
-    class DummyTokenizer:
-        def encode(self, text, add_bos=False, add_eos=False):
-            return [min(ord(c), 31999) for c in text[:2048]]
+    # Use SentencePiece if available, else char-level fallback
+    tokenizer_path = data_dir / "tokenizer.model"
+    if tokenizer_path.exists():
+        from src.tokenizer import PotatoTokenizer
+        tok = PotatoTokenizer()
+        tok.load(tokenizer_path)
+        # Pad to multiple of 16 for efficient matmul
+        config.vocab_size = ((len(tok) + 15) // 16) * 16
+    else:
+        class DummyTokenizer:
+            def encode(self, text, add_bos=False, add_eos=False):
+                return [min(ord(c), 31999) for c in text[:2048]]
+        tok = DummyTokenizer()
+
+    model = PotatoLM(config).to(args.device)
 
     from data.loaders import TextDataset
-    dataset = TextDataset(text_files, DummyTokenizer(), max_length=128)
+    dataset = TextDataset(text_files, tok, max_length=256, stride=128)
     loader = DataLoader(dataset, batch_size=args.batch_size, shuffle=True)
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)

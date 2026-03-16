@@ -28,9 +28,12 @@ class InferenceEngine:
             self.model = model
             self.config = model.config
         elif checkpoint_path is not None and config is not None:
+            state = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
+            # Infer vocab_size from checkpoint
+            if "embedding.weight" in state:
+                config.vocab_size = state["embedding.weight"].shape[0]
             self.config = config
             self.model = PotatoLM(config)
-            state = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
             self.model.load_state_dict(state, strict=False)
         else:
             raise ValueError("Provide either model or (checkpoint_path + config)")

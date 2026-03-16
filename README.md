@@ -18,8 +18,14 @@ pip install -r requirements.txt
 # Validate (tiny ~11M params)
 python scripts/validate.py
 
-# Run inference (no checkpoint = random init)
-python scripts/run_inference.py --prompt "Hello, world"
+# Prepare data (trains SentencePiece tokenizer on data/*.txt)
+python scripts/prepare_data.py
+
+# Pre-train
+python -m training.pretrain --config tiny --max_steps 500
+
+# Run inference
+python scripts/run_inference.py --checkpoint checkpoints/pretrain_tiny_final.pt --prompt "Machine learning is"
 ```
 
 ## Project Structure
@@ -36,9 +42,17 @@ NEW-AI/
 
 ## Training Pipeline
 
-1. **Pre-train**: `python -m training.pretrain --config tiny --max_steps 1000`
-2. **SFT**: `python -m training.sft --checkpoint checkpoints/pretrain_tiny_final.pt`
-3. **Agent**: `python -m training.agent_finetune --checkpoint checkpoints/sft_tiny.pt`
+1. **Prepare data**: Add `.txt` files to `data/`, then `python scripts/prepare_data.py` to train tokenizer
+2. **Pre-train**: `python -m training.pretrain --config tiny --max_steps 1000`
+3. **SFT**: `python -m training.sft --checkpoint checkpoints/pretrain_tiny_final.pt`
+4. **Agent**: `python -m training.agent_finetune --checkpoint checkpoints/sft_tiny.pt`
+
+## Data
+
+- `data/sample.txt`, `prose.txt`, `facts.txt`, `code.txt` - diverse pre-training text
+- `data/instructions.jsonl` - instruction tuning (instruction, output)
+- `data/agent_trajectories.jsonl` - ReAct agent examples
+- Run `python scripts/prepare_data.py --download_wikitext` for more data
 
 ## Configs
 
