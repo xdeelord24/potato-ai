@@ -81,8 +81,8 @@ def main():
 
     txt_files = list(args.data_dir.glob("*.txt"))
     if txt_files:
-        # SentencePiece caps vocab at ~corpus unique tokens; use 4096 max for small data
-        vocab_size = min(args.vocab_size, 4096)
+        # SentencePiece caps vocab at ~corpus unique tokens; use 3000 for small data
+        vocab_size = min(args.vocab_size, 3000)
         train_tokenizer(args.data_dir, args.tokenizer_out, vocab_size)
     else:
         print("No .txt files found. Add files to data/ or use --download_wikitext")
