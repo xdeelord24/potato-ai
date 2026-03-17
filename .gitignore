@@ -37,7 +37,7 @@ env/
 .DS_Store
 Thumbs.db
 
-# ML / Training
+# ML / Training (exclude from GitHub)
 checkpoints/
 *.pt
 *.pth
